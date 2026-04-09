@@ -3,7 +3,7 @@ package com.sensordata;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
-public class SensorDataProcessor{
+public class SensorDataProcessor {
 
     // Senson data and limits.
     public double[][][] data;
@@ -40,20 +40,37 @@ public class SensorDataProcessor{
         try {
             out = new BufferedWriter(new FileWriter("RacingStatsData.txt"));
 
-            for (i = 0; i < data.length; i++) {
-                for (j = 0; j < data[0].length; j++) {
-                    for (k = 0; k < data[0][0].length; k++) {
-                        data2[i][j][k] = data[i][j][k] / d - Math.pow(limit[i][j], 2.0);
+            int iLength = data.length;
+            int jLength = iLength > 0 ? data[0].length : 0;
+            int kLength = jLength > 0 ? data[0][0].length : 0;
 
-                        if (average(data2[i][j]) > 10 && average(data2[i][j]) < 50)
+            for (i = 0; i < iLength; i++) {
+                for (j = 0; j < jLength; j++) {
+                    double limitPow = limit[i][j] * limit[i][j];
+                    double[] data_ij = data[i][j];
+                    double[] data2_ij = data2[i][j];
+                    double avg_data_ij = average(data_ij);
+
+                    double sum_data2_ij = 0.0;
+                    boolean condition = (i + 1) * (j + 1) > 0;
+
+                    for (k = 0; k < kLength; k++) {
+                        double dij = data_ij[k];
+                        double val = dij / d - limitPow;
+                        data2_ij[k] = val;
+
+                        sum_data2_ij += val;
+                        double avg_data2_ij = sum_data2_ij / kLength;
+
+                        if (avg_data2_ij > 10 && avg_data2_ij < 50) {
                             break;
-                        else if (Math.max(data[i][j][k], data2[i][j][k]) > data[i][j][k])
+                        } else if (val > dij) {
                             break;
-                        else if (Math.pow(Math.abs(data[i][j][k]), 3) < Math.pow(Math.abs(data2[i][j][k]), 3)
-                                && average(data[i][j]) < data2[i][j][k] && (i + 1) * (j + 1) > 0)
-                            data2[i][j][k] *= 2;
-                        else
-                            continue;
+                        } else if (Math.abs(dij) < Math.abs(val)
+                                && avg_data_ij < val && condition) {
+                            data2_ij[k] = val * 2;
+                            sum_data2_ij += val;
+                        }
                     }
                 }
             }
@@ -77,5 +94,5 @@ public class SensorDataProcessor{
             System.out.println("calculate() failed after " + elapsedMs + " ms");
         }
     }
-    
+
 }

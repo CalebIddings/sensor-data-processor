@@ -3,7 +3,7 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
-public class SensorDataProcessor{
+public class SensorDataProcessor {
 
     // Senson data and limits.
     public double[][][] data;
@@ -40,43 +40,60 @@ public class SensorDataProcessor{
         try {
 <span class="fc" id="L41">            out = new BufferedWriter(new FileWriter(&quot;RacingStatsData.txt&quot;));</span>
 
-<span class="fc bfc" id="L43" title="All 2 branches covered.">            for (i = 0; i &lt; data.length; i++) {</span>
-<span class="fc bfc" id="L44" title="All 2 branches covered.">                for (j = 0; j &lt; data[0].length; j++) {</span>
-<span class="fc bfc" id="L45" title="All 2 branches covered.">                    for (k = 0; k &lt; data[0][0].length; k++) {</span>
-<span class="fc" id="L46">                        data2[i][j][k] = data[i][j][k] / d - Math.pow(limit[i][j], 2.0);</span>
+<span class="fc" id="L43">            int iLength = data.length;</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">            int jLength = iLength &gt; 0 ? data[0].length : 0;</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            int kLength = jLength &gt; 0 ? data[0][0].length : 0;</span>
 
-<span class="fc bfc" id="L48" title="All 4 branches covered.">                        if (average(data2[i][j]) &gt; 10 &amp;&amp; average(data2[i][j]) &lt; 50)</span>
-<span class="fc" id="L49">                            break;</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">                        else if (Math.max(data[i][j][k], data2[i][j][k]) &gt; data[i][j][k])</span>
-<span class="fc" id="L51">                            break;</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">                        else if (Math.pow(Math.abs(data[i][j][k]), 3) &lt; Math.pow(Math.abs(data2[i][j][k]), 3)</span>
-<span class="pc bpc" id="L53" title="1 of 4 branches missed.">                                &amp;&amp; average(data[i][j]) &lt; data2[i][j][k] &amp;&amp; (i + 1) * (j + 1) &gt; 0)</span>
-<span class="fc" id="L54">                            data2[i][j][k] *= 2;</span>
-                        else
-                            continue;
+<span class="fc bfc" id="L47" title="All 2 branches covered.">            for (i = 0; i &lt; iLength; i++) {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                for (j = 0; j &lt; jLength; j++) {</span>
+<span class="fc" id="L49">                    double limitPow = limit[i][j] * limit[i][j];</span>
+<span class="fc" id="L50">                    double[] data_ij = data[i][j];</span>
+<span class="fc" id="L51">                    double[] data2_ij = data2[i][j];</span>
+<span class="fc" id="L52">                    double avg_data_ij = average(data_ij);</span>
+
+<span class="fc" id="L54">                    double sum_data2_ij = 0.0;</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                    boolean condition = (i + 1) * (j + 1) &gt; 0;</span>
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                    for (k = 0; k &lt; kLength; k++) {</span>
+<span class="fc" id="L58">                        double dij = data_ij[k];</span>
+<span class="fc" id="L59">                        double val = dij / d - limitPow;</span>
+<span class="fc" id="L60">                        data2_ij[k] = val;</span>
+
+<span class="fc" id="L62">                        sum_data2_ij += val;</span>
+<span class="fc" id="L63">                        double avg_data2_ij = sum_data2_ij / kLength;</span>
+
+<span class="fc bfc" id="L65" title="All 4 branches covered.">                        if (avg_data2_ij &gt; 10 &amp;&amp; avg_data2_ij &lt; 50) {</span>
+<span class="fc" id="L66">                            break;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                        } else if (val &gt; dij) {</span>
+<span class="fc" id="L68">                            break;</span>
+<span class="pc bpc" id="L69" title="1 of 6 branches missed.">                        } else if (Math.abs(dij) &lt; Math.abs(val)</span>
+                                &amp;&amp; avg_data_ij &lt; val &amp;&amp; condition) {
+<span class="fc" id="L71">                            data2_ij[k] = val * 2;</span>
+<span class="fc" id="L72">                            sum_data2_ij += val;</span>
+                        }
                     }
                 }
             }
 
-<span class="fc bfc" id="L61" title="All 2 branches covered.">            for (i = 0; i &lt; data2.length; i++) {</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">                for (j = 0; j &lt; data2[0].length; j++) {</span>
-<span class="fc" id="L63">                    out.write(data2[i][j] + &quot;\t&quot;);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">            for (i = 0; i &lt; data2.length; i++) {</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                for (j = 0; j &lt; data2[0].length; j++) {</span>
+<span class="fc" id="L80">                    out.write(data2[i][j] + &quot;\t&quot;);</span>
                 }
             }
 
-<span class="fc" id="L67">            out.close();</span>
+<span class="fc" id="L84">            out.close();</span>
 
-<span class="fc" id="L69">            long endTime = System.nanoTime();</span>
-<span class="fc" id="L70">            long elapsedMs = (endTime - startTime) / 1_000_000;</span>
-<span class="fc" id="L71">            System.out.println(&quot;calculate() completed in &quot; + elapsedMs + &quot; ms&quot;);</span>
+<span class="fc" id="L86">            long endTime = System.nanoTime();</span>
+<span class="fc" id="L87">            long elapsedMs = (endTime - startTime) / 1_000_000;</span>
+<span class="fc" id="L88">            System.out.println(&quot;calculate() completed in &quot; + elapsedMs + &quot; ms&quot;);</span>
 
-<span class="fc" id="L73">        } catch (Exception e) {</span>
-<span class="fc" id="L74">            System.out.println(&quot;Error= &quot; + e);</span>
-<span class="fc" id="L75">            long endTime = System.nanoTime();</span>
-<span class="fc" id="L76">            long elapsedMs = (endTime - startTime) / 1_000_000;</span>
-<span class="fc" id="L77">            System.out.println(&quot;calculate() failed after &quot; + elapsedMs + &quot; ms&quot;);</span>
-<span class="fc" id="L78">        }</span>
-<span class="fc" id="L79">    }</span>
-    
+<span class="fc" id="L90">        } catch (Exception e) {</span>
+<span class="fc" id="L91">            System.out.println(&quot;Error= &quot; + e);</span>
+<span class="fc" id="L92">            long endTime = System.nanoTime();</span>
+<span class="fc" id="L93">            long elapsedMs = (endTime - startTime) / 1_000_000;</span>
+<span class="fc" id="L94">            System.out.println(&quot;calculate() failed after &quot; + elapsedMs + &quot; ms&quot;);</span>
+<span class="fc" id="L95">        }</span>
+<span class="fc" id="L96">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
